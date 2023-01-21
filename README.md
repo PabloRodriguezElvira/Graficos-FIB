@@ -1,3 +1,3 @@
 # Graficos-FIB
 Soluciones para algunos ejercicios de la asignatura de Gráficos de la FIB.
-En la carpeta de NewViewer... estan las carpetas con los ejercicios.
+Los ejercicios están separados por shaders (VS+FS), geometry shaders (VS+FS+GS) y plugins.
