@@ -18,7 +18,7 @@ class Draw_bounding_box: public QObject, public Plugin
    	QOpenGLShader* vs;
 	QOpenGLShader* fs;	
 	
-	GLuint cubo_VAO;
+	GLuint caja_VAO;
 	GLuint coords_VBO;
 	GLuint color_VBO;
 	

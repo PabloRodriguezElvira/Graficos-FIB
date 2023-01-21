@@ -22,7 +22,7 @@ void Texture_splatting::onPluginLoad()
     program->addShader(fs);
     program->link();
     cout << "Link log:" << program->log().toStdString() << endl;	
-    
+ 
     // Load Texture 1
 	QString filename1 = QFileDialog::getOpenFileName(0, "Open Image", "../../Textures", "Image file (*.png *.jpg)");	
 	QImage img1(filename1);	

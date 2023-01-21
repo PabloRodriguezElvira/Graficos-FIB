@@ -37,7 +37,7 @@ void Reflection::onPluginLoad()
 	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	g.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, IMAGE_WIDTH, IMAGE_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
     
-    //Textura right quad
+    //Textura quad -X.
     g.glActiveTexture(GL_TEXTURE0);
     g.glGenTextures( 1, &textureId[1]);
 	
@@ -48,16 +48,16 @@ void Reflection::onPluginLoad()
 	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 	g.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, IMAGE_WIDTH, IMAGE_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
 
-    //Textura left quad.
-    // g.glActiveTexture(GL_TEXTURE0);
-    // g.glGenTextures( 1, &textureId[2]);
+    //Textura quad -Z.
+    g.glActiveTexture(GL_TEXTURE0);
+    g.glGenTextures( 1, &textureId[2]);
 	
-    // g.glBindTexture(GL_TEXTURE_2D, textureId[2]);
-	// g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	// g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	// g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	// g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	// g.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, IMAGE_WIDTH, IMAGE_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
+    g.glBindTexture(GL_TEXTURE_2D, textureId[2]);
+	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	g.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	g.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, IMAGE_WIDTH, IMAGE_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
 
     // Resize to power-of-two viewport
     g.resize(IMAGE_WIDTH,IMAGE_HEIGHT);
@@ -109,11 +109,11 @@ bool Reflection::paintGL()
 	g.glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// Reflection matrix with respect to Y=min.y
-	QMatrix4x4 reflection;
-	reflection.scale(1,-1,1);
-	reflection.translate(0, -2*scene()->boundingBox().min().y(), 0);
-
-	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * reflection);
+	QMatrix4x4 modelMatrix;
+	modelMatrix.scale(1,-1,1);
+	modelMatrix.translate(0, -2*scene()->boundingBox().min().y(), 0);
+	
+	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * modelMatrix);
 	if (drawPlugin()) drawPlugin()->drawScene();
     
 	// Get texture for bottom quad. 
@@ -128,10 +128,10 @@ bool Reflection::paintGL()
 	g.glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// Reflection matrix with respect to Y=min.y
-	QMatrix4x4 ModelMatrix;
-	ModelMatrix.translate(2*scene()->boundingBox().min().x(), 0, 0);
-
-	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * ModelMatrix);
+	modelMatrix = QMatrix4x4();
+	modelMatrix.translate(2*scene()->boundingBox().min().x(), 0, 0);
+	
+	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * modelMatrix);
 	if (drawPlugin()) drawPlugin()->drawScene();
 	
     //Get texture for right quad.
@@ -146,16 +146,17 @@ bool Reflection::paintGL()
 	g.glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	// Reflection matrix with respect to Y=min.y
-    ModelMatrix = QMatrix4x4();
-	ModelMatrix.translate(0, 0, 2*scene()->boundingBox().min().z());
+	modelMatrix = QMatrix4x4();
+	modelMatrix.translate(0, 0, 2*scene()->boundingBox().min().z());
 
-	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * ModelMatrix);
+	g.defaultProgram()->setUniformValue("modelViewProjectionMatrix", camera()->projectionMatrix() * camera()->viewMatrix() * modelMatrix);
 	if (drawPlugin()) drawPlugin()->drawScene();
 	
     //Get texture for right quad.
     g.glBindTexture(GL_TEXTURE_2D, textureId[2]);		
 	g.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
 	g.glGenerateMipmap(GL_TEXTURE_2D);
+
 
 	// ********************Pass 3: draw scene in its real position.********************
 	// Uses default shaders
@@ -191,12 +192,12 @@ bool Reflection::paintGL()
     drawRect(g, V0, V1, V2, V3);
 	
     // draw -Z quad with texture
-    // g.glBindTexture(GL_TEXTURE_2D, textureId[2]);
-    // V0 = b.min();
-	// V1 = Point(b.min().x(), b.min().y(), b.max().z());
-	// V2 = Point(b.min().x(), b.max().y(), b.max().z());
-	// V3 = Point(b.min().x(), b.max().y(), b.min().z());
-    // drawRect(g, V0, V1, V2, V3);
+    g.glBindTexture(GL_TEXTURE_2D, textureId[2]);
+    V0 = b.min();
+	V1 = Point(b.min().x(), b.max().y(), b.min().z());
+	V2 = Point(b.max().x(), b.max().y(), b.min().z());
+	V3 = Point(b.max().x(), b.min().y(), b.min().z());
+    drawRect(g, V0, V1, V2, V3);
 
 	// restore state
     g.defaultProgram()->bind();

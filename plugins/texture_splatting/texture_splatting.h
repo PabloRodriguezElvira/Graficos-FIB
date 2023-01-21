@@ -22,7 +22,9 @@ class Texture_splatting: public QObject, public Plugin
 	QOpenGLShader* fs;	
 
     GLuint textureId0, textureId1, textureId2;
-}
+};
+
+#endif
 
 
 

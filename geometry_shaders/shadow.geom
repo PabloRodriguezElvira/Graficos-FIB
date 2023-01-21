@@ -19,7 +19,7 @@ void main( void )
 	}
 	EndPrimitive();
 	for (int i = 0; i < 3; ++i) {
-		//Triangulo negro:
+		// Triangulo negro:
 		gfrontColor = vec4(0,0,0,1);
 		vec4 pos = vec4(gl_in[i].gl_Position.x, boundingBoxMin.y, gl_in[i].gl_Position.z, gl_in[i].gl_Position.w);
 		gl_Position = modelViewProjectionMatrix * pos;

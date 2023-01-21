@@ -1,2 +1,2 @@
-TARGET     = $$qtLibraryTarget(draw_bounding_box6)
+TARGET     = $$qtLibraryTarget(draw_bounding_box1)
 include(../common.pro)
